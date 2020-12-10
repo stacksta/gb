@@ -14,3 +14,8 @@ void Bus::write(uint16_t address, uint8_t value)
 {
     mem.write(address, value);
 }
+
+void Bus::loadROM(std::string path)
+{
+    mem.loadROM(path);
+}

@@ -27,6 +27,8 @@ class CPU
         int cycles {};
 
         uint16_t getPC();
+        void setPC(uint16_t address);
+
     private:
         /*registers*/
         Register reg_af {};
@@ -51,6 +53,8 @@ class CPU
 
         /*instructions*/
         void ld_nn(uint8_t *reg);//ld nn, n
+        void ld_r(uint8_t *r1, uint8_t r2);//ld r1, r2
+        void ld_a(uint8_t value);//ld A, n
         /*instructions*/
 };
 
