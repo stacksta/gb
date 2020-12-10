@@ -1,6 +1,16 @@
 #include "bus.h"
 
-Bus::Bus(MMU *m)
+Bus::Bus()
 {
-    mem = m; 
+
+}
+
+uint8_t Bus::read(uint16_t address)
+{
+    return mem.read(address);
+}
+
+void Bus::write(uint16_t address, uint8_t value)
+{
+    mem.write(address, value);
 }

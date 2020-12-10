@@ -2,7 +2,19 @@
 #define CPU_H
 
 #include <cstdint>
+#include <fmt/core.h>
+#include <fmt/color.h>
 #include "bus.h"
+
+union Register
+{
+    struct
+    {
+        uint8_t hi;
+        uint8_t lo;
+    };
+    uint16_t reg;
+};
 
 class CPU
 {
@@ -10,14 +22,19 @@ class CPU
         CPU(Bus *b);
         ~CPU() {}
 
+        void execute(uint8_t opcode);
+
+        int cycles {};
+
+        uint16_t getPC();
     private:
         /*registers*/
-        uint16_t reg_af {};
-        uint16_t reg_bc {};
-        uint16_t reg_de {};
-        uint16_t reg_hl {};
-        uint16_t reg_sp {};
-        uint16_t reg_pc {};
+        Register reg_af {};
+        Register reg_bc {};
+        Register reg_de {};
+        Register reg_hl {};
+        Register reg_sp {};
+        Register reg_pc {};
 
         /*flags*/
         bool flag_zero {};
@@ -27,6 +44,14 @@ class CPU
 
 
         Bus *bus = nullptr;
+
+        /*addressing modes*/
+        void immediate();
+        /*addressing modes*/
+
+        /*instructions*/
+        void ld_nn(uint8_t *reg);//ld nn, n
+        /*instructions*/
 };
 
 
