@@ -512,10 +512,44 @@ void CPU::execute(uint8_t opcode)
         case 0x0A:
                 {
                     //takes 8 cycles
-                    ld_a(reg_bc.hi);
-                    cycles += 4;
+                    ld_a(reg_bc.reg);
 
                     fmt::print(fg(fmt::color::dark_green), "LD A, (BC)\n");
+                }
+                break;
+        case 0x1A:
+                {
+                    //takes 8 cycles
+                    ld_a(reg_de.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "LD A, (DE)\n");                
+                }
+                break;
+        case 0xFA:
+                {
+                    //take 16 cycles
+                    reg_pc.reg++;
+                    uint16_t lo = bus->read(reg_pc.reg);
+
+                    reg_pc.reg++;
+                    uint16_t hi = bus->read(reg_pc.reg);
+
+                    uint16_t address = (hi<< 8) | lo;
+
+                    ld_a(address);
+                    cycles += 8;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD A, (nn)\n");                
+                }
+                break;
+        case 0x3E:
+                {
+                    //takes 8 cycles
+                    reg_pc.reg++;
+                    reg_af.hi = bus->read(reg_pc.reg);  
+                    cycles += 8;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD A, #\n");                
                 }
                 break;
 
@@ -555,10 +589,10 @@ void CPU::ld_r(uint8_t *r1, uint8_t r2)
 }
 
 //LD A,n
-void CPU::ld_a(uint8_t value)
+void CPU::ld_a(uint16_t value)
 {
-    reg_af.hi = value;
-    cycles += 4;
+    reg_af.hi = bus->read(value);
+    cycles += 8;
     reg_pc.reg++;
 }
 
@@ -567,5 +601,6 @@ void CPU::ld_mem_r(uint16_t *r1, uint8_t r2)
 {
     //temp
     bus->write(*r1, r2);
+    reg_pc.reg++;
 }
 /*instructions*/
