@@ -56,6 +56,7 @@ class CPU
         void ld_r(uint8_t *r1, uint8_t r2);//ld r1, r2; ld r1, (r2)
         void ld_mem_r(uint16_t *r1, uint8_t r2);//ld (r1), r2
         void ld_a(uint16_t value);//ld A, (r2)
+        void ld_n(uint8_t *reg);// ld reg, A; ld (reg), A
         /*instructions*/
 };
 
