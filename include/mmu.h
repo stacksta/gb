@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <fmt/core.h>
 
 
 class MMU
@@ -22,6 +23,6 @@ class MMU
         std::vector<uint8_t> RAM;
         std::vector<uint8_t> VRAM;
 
-        std::vector<uint8_t> prg;
+        std::vector<uint8_t> cartridge;
 };
 #endif 
