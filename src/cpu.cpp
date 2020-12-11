@@ -440,78 +440,72 @@ void CPU::execute(uint8_t opcode)
                     fmt::print(fg(fmt::color::dark_green), "LD L, (HL)\n");  
                 }
                 break;
-        // case 0x70:
-        //         {
-        //             //takes 8 cycles
-        //             uint8_t val = bus->read(reg_hl.reg);
-        //             ld_r(&val, reg_bc.hi);
-        //             cycles += 4;
+        
+        case 0x70:
+                {
+                    //takes 8 cycles
+                    ld_mem_r(&reg_hl.reg, reg_bc.hi);
+                    cycles += 4;
 
-        //             fmt::print(fg(fmt::color::dark_green), "LD (HL), B\n");  
-        //         }
-        //         break;
-        // case 0x71:
-        //         {
-        //             //takes 8 cycles
-        //             uint8_t val = bus->read(reg_hl.reg);
-        //             ld_r(&val, reg_bc.lo);
-        //             cycles += 4;
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL), B\n");  
+                }
+                break;
+        case 0x71:
+                {
+                    //takes 8 cycles
+                    ld_r(&reg_hl.reg, reg_bc.lo);
+                    cycles += 4;
 
-        //             fmt::print(fg(fmt::color::dark_green), "LD (HL), C\n");  
-        //         }
-        //         break;
-        // case 0x72:
-        //         {
-        //             //takes 8 cycles
-        //             uint8_t val = bus->read(reg_hl.reg);
-        //             ld_r(&val, reg_de.hi);
-        //             cycles += 4;
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL), C\n");  
+                }
+                break;
+        case 0x72:
+                {
+                    //takes 8 cycles
+                    ld_r(&reg_hl.reg, reg_de.hi);
+                    cycles += 4;
 
-        //             fmt::print(fg(fmt::color::dark_green), "LD (HL), D\n");  
-        //         }
-        //         break;
-        // case 0x73:
-        //         {
-        //             //takes 8 cycles
-        //             uint8_t val = bus->read(reg_hl.reg);
-        //             ld_r(&val, reg_de.lo);
-        //             cycles += 4;
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL), D\n");  
+                }
+                break;
+        case 0x73:
+                {
+                    //takes 8 cycles
+                    ld_r(&reg_hl.reg, reg_de.lo);
+                    cycles += 4;
 
-        //             fmt::print(fg(fmt::color::dark_green), "LD (HL), E\n");  
-        //         }
-        //         break;
-        // case 0x74:
-        //         {
-        //             //takes 8 cycles
-        //             uint8_t val = bus->read(reg_hl.reg);
-        //             ld_r(&val, reg_hl.hi);
-        //             cycles += 4;
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL), E\n");  
+                }
+                break;
+        case 0x74:
+                {
+                    //takes 8 cycles
+                    ld_r(&reg_hl.reg, reg_hl.hi);
+                    cycles += 4;
 
-        //             fmt::print(fg(fmt::color::dark_green), "LD (HL), H\n");  
-        //         }
-        //         break;
-        // case 0x75:
-        //         {
-        //             //takes 8 cycles
-        //             uint8_t val = bus->read(reg_hl.reg);
-        //             ld_r(&val, reg_hl.lo);
-        //             cycles += 4;
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL), H\n");  
+                }
+                break;
+        case 0x75:
+                {
+                    //takes 8 cycles
+                    ld_r(&reg_hl.reg, reg_hl.lo);
+                    cycles += 4;
 
-        //             fmt::print(fg(fmt::color::dark_green), "LD (HL), L\n");  
-        //         }
-        //         break;
-        // case 0x36:
-        //         {
-        //             //takes 12 cycles
-        //             uint8_t val = bus->read(reg_hl.reg);
-        //             reg_pc.reg++;
-        //             uint8_t n = bus->read(reg_pc.reg);
-        //             ld_r(&val, n);
-        //             cycles += 8;
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL), L\n");  
+                }
+                break;
+        case 0x36:
+                {
+                    //takes 12 cycles
+                    reg_pc.reg++;
+                    uint8_t n = bus->read(reg_pc.reg);
+                    ld_r(&reg_hl.reg, n);
+                    cycles += 8;
 
-        //             fmt::print(fg(fmt::color::dark_green), "LD (HL), n\n");  
-        //         }
-        //         break;
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL), n\n");  
+                }
+                break;
             
 
 
@@ -566,5 +560,11 @@ void CPU::ld_a(uint8_t value)
     reg_af.hi = value;
     cycles += 4;
     reg_pc.reg++;
+}
+
+//LD (r1), r2
+void CPU::ld_mem_r(uint16_t *r1, uint8_t r2)
+{
+    *r1 = r2;
 }
 /*instructions*/
