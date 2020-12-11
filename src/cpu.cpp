@@ -565,6 +565,7 @@ void CPU::ld_a(uint8_t value)
 //LD (r1), r2
 void CPU::ld_mem_r(uint16_t *r1, uint8_t r2)
 {
-    *r1 = r2;
+    //temp
+    bus->write(*r1, r2);
 }
 /*instructions*/
