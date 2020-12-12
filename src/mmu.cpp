@@ -7,12 +7,76 @@ MMU::MMU()
 
 uint8_t MMU::read(uint16_t address)
 {
-    return cartridge[address];
+    if(type == MBC::none)
+        return cartridge[address];
+
+    //MBC1
+    if(type == MBC::mbc1)
+    {
+        if(address >= 0x0000 && address < 0x4000)
+        {
+            if(!mode_flag) //if mode flag is 0
+                return cartridge[address];
+            else 
+            {
+                //TODO
+                //get zero bank number and return value
+                //0x4000 * zero bank number + addr
+
+                return 1;//temp
+            }
+        }
+
+        if(address >= 0x4000 && address < 0x8000)
+        {
+            //TODO
+            //0x4000 * high bank number + (addr - 0x4000)
+
+            return 1;//temp
+        }
+
+        if(address >= 0xA000 && address < 0xC000)
+        {
+            //TODO
+
+            return 1;//temp
+        }
+    }
 }
 
 void MMU::write(uint16_t address, uint8_t value)
 {
-    cartridge[address] = value;
+    if(type == MBC::none)
+        cartridge[address] = value;
+
+    //MBC1
+    if(type == MBC::mbc1)
+    {
+        if(address >= 0x0000 && address < 0x2000)
+        {
+            if(value & 0xF == 0xA) 
+            {
+                //enable ram
+            }
+        }
+        if(address >= 0x2000 && address < 0x4000)
+        {
+            //set rom bank number
+        }
+        if(address >= 0x4000 && address < 0x6000)
+        {
+
+        }
+        if(address >= 0x6000 && address < 0x8000)
+        {
+            //set mode flag to the lsb of value
+            mode_flag = value & 0x1;
+        }
+        if(address >= 0xA000 && address < 0xC000)
+        {
+            //write to external ram if enabled
+        }
+    }
 }
 
 
@@ -44,9 +108,10 @@ void MMU::loadROM(std::string path)
         fmt::print("Cartridge Type: ");
         switch(cartridge[0x147])
         {
-            case 0x00:  fmt::print("{0:#x} ROM only\n", cartridge[0x147]); break;
-            case 0x01:  fmt::print("{0:#x} MBC1\n", cartridge[0x147]); break;
-            case 0x02:  fmt::print("{0:#x} MBC1+RAM\n", cartridge[0x147]); break;
+            case 0x00:  fmt::print("{0:#x} ROM only\n", cartridge[0x147]); type = MBC::none; break;
+            case 0x01:  fmt::print("{0:#x} MBC1\n", cartridge[0x147]); type = MBC::mbc1; break;
+            case 0x02:  fmt::print("{0:#x} MBC1+RAM\n", cartridge[0x147]); type = MBC::mbc1_ram; break;
+            case 0x03:  fmt::print("{0:#x} MBC1+RAM+BATTERY\n", cartridge[0x147]); type = MBC::mbc1_ram_battery; break;
             default: fmt::print("{0:#x} Not supported currently!\n", cartridge[0x147]);
         }
 
@@ -57,6 +122,7 @@ void MMU::loadROM(std::string path)
             case 0x00: fmt::print("32kB, 2 Banks\n"); break;
             case 0x01: fmt::print("64kB, 4 Banks\n"); break;
             case 0x02: fmt::print("128kB, 8 Banks\n"); break;
+            case 0x03: fmt::print("256kB, 16 Banks\n"); break;
             default: fmt::print("{0:#x} Not supported currently!\n", cartridge[0x148]);
         }
 

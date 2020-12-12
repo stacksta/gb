@@ -19,10 +19,21 @@ class MMU
 
         void loadROM(std::string path);
 
+        enum MBC
+        {
+            none = 0,
+            mbc1 = 1,
+            mbc1_ram = 2,
+            mbc1_ram_battery = 3
+        };
+        
+        MBC type;
     private:
         std::vector<uint8_t> RAM;
         std::vector<uint8_t> VRAM;
 
         std::vector<uint8_t> cartridge;
+
+        bool mode_flag {};
 };
 #endif 
