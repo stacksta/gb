@@ -637,10 +637,140 @@ void CPU::execute(uint8_t opcode)
                     ld_mem_r(&address, reg_af.hi);
                     cycles += 8;
 
+                    reg_pc.reg++;
+
                     fmt::print(fg(fmt::color::dark_green), "LD (nn), A\n");                
                 }
                 break;
 
+
+        case 0xF2:
+                {
+                    //takes 8 cycles
+                    //put value at address $FF00 + C into A
+                    uint8_t value = bus->read(0xF00 + reg_bc.hi);
+                    reg_af.hi = value;
+
+                    cycles += 8;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD A, ($FF00 + C)\n");  
+                }
+                break;
+
+        case 0xE2:
+                {
+                    //takes 8 cycles
+                    //put A into address $FF00 + C
+                    bus->write(0xFF00 + reg_bc.hi, reg_af.hi);
+                    cycles += 8;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD ($FF00 + C), A\n");
+                }
+                break;
+
+        case 0x3A:
+                {
+                    //takes 8 cycles
+                    //put value at address HL into A. Decrement HL.
+                    uint8_t value = bus->read(reg_hl.reg);
+                    reg_af.hi = value;
+
+                    reg_hl.reg -= 1;
+
+                    cycles += 8;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD A, (HL-) \n");                   
+                }   
+                break;
+
+        case 0x32:
+                {
+                    //takes 8 cycles
+                    //put A into memory address HL. Decrement HL.
+                    bus->write(reg_hl.reg, reg_af.hi);
+                    reg_hl.reg -= 1;
+
+                    cycles += 8;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL-), A\n");
+                }
+                break;
+
+        case 0x2A:
+                {
+                    //takes 8 cycles
+                    //put value at address HL into A. Increment HL.
+                    uint8_t value = bus->read(reg_hl.reg);
+                    reg_af.hi = value;
+
+                    reg_hl.reg += 1;
+
+                    cycles += 8;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD A, (HL+)\n");
+                }
+                break;
+
+        case 0x22:
+                {
+                    //takes 8 cycles
+                    //put A into memory address HL. Increment HL.
+                    bus->write(reg_hl.reg, reg_af.hi);
+                    reg_hl.reg += 1;
+
+                    cycles += 8;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD (HL+), A\n");
+                }   
+                break;
+
+
+        case 0xE0:
+                {
+                    //takes 12 cycles
+                    //put A into memory address $FF00+n
+                    immediate();
+                    uint8_t n = bus->read(reg_pc.reg);
+                    bus->write(0xFF00 + n, reg_af.hi);
+
+                    cycles += 12;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD ($FF00+n), A\n");     
+                }
+                break;
+
+        case 0xF0:
+                {
+                    //takes 12 cycles
+                    //put memory address $FF00+n into A
+                    immediate();
+                    uint8_t n = bus->read(reg_pc.reg);
+
+                    uint8_t value = bus->read(0xFF00 + n);
+                    reg_af.hi = n;
+
+
+                    cycles += 12;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD A, ($FF00+n)\n");     
+                }
+                break;
 
 
 

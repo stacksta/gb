@@ -5,6 +5,21 @@ MMU::MMU()
     cartridge.resize(0xFFFF);
 }
 
+void MMU::init()
+{
+    if(type == MBC::none) 
+        return;
+    if(type == MBC::mbc1)
+    {
+        if(cartridge.size() < 0x100000)// <1MB 32 Banks
+            zero_bank = 0;
+        if(cartridge.size() == 0x100000)// == 1MB 64 Banks
+        {
+
+        }
+    }
+}
+
 uint8_t MMU::read(uint16_t address)
 {
     if(type == MBC::none)
@@ -89,7 +104,7 @@ void MMU::loadROM(std::string path)
         rom.read(reinterpret_cast<char*>(&cartridge[0]), 0xFFFF);
 
         //CE ED 66 66 CC 0D -> logo
-        if(cartridge[0x104] == 0xCE && cartridge[0x105] == 0xED && cartridge[0x106] == 0x66 && cartridge[0x106] == 0x66)
+        if(cartridge[0x104] == 0xCE && cartridge[0x105] == 0xED && cartridge[0x106] == 0x66 && cartridge[0x107] == 0x66)
         {
             fmt::print("Valid GB cartridge!\n");
         }
@@ -119,10 +134,10 @@ void MMU::loadROM(std::string path)
         fmt::print("ROM size: ");
         switch(cartridge[0x148])
         {
-            case 0x00: fmt::print("32kB, 2 Banks\n"); break;
-            case 0x01: fmt::print("64kB, 4 Banks\n"); break;
-            case 0x02: fmt::print("128kB, 8 Banks\n"); break;
-            case 0x03: fmt::print("256kB, 16 Banks\n"); break;
+            case 0x00: fmt::print("32kB, 2 Banks\n"); rom_size = 0x8000; break;
+            case 0x01: fmt::print("64kB, 4 Banks\n"); rom_size = 0xFFFF; break;
+            case 0x02: fmt::print("128kB, 8 Banks\n"); rom_size = 0x20000; break;
+            case 0x03: fmt::print("256kB, 16 Banks\n"); rom_size = 0x40000; break;
             default: fmt::print("{0:#x} Not supported currently!\n", cartridge[0x148]);
         }
 
@@ -131,13 +146,16 @@ void MMU::loadROM(std::string path)
         switch(cartridge[0x149])
         {
             case 0x00: fmt::print("None\n"); break;
-            case 0x01: fmt::print("2kB\n"); break;
-            case 0x02: fmt::print("8kB\n"); break;
-            case 0x03: fmt::print("32kB (4 Banks of 8kB each)\n"); break;
-            case 0x04: fmt::print("128kB (16 Banks of 8kB each)\n"); break;
-            case 0x05: fmt::print("64kB (8 Banks of 8kB each)\n"); break;
+            case 0x01: fmt::print("2kB\n"); ram_size = 0x800; break;
+            case 0x02: fmt::print("8kB\n"); ram_size = 0x2000; break;
+            case 0x03: fmt::print("32kB (4 Banks of 8kB each)\n"); ram_size = 0x8000; break;
+            case 0x04: fmt::print("128kB (16 Banks of 8kB each)\n"); ram_size = 0x20000; break;
+            case 0x05: fmt::print("64kB (8 Banks of 8kB each)\n"); ram_size = 0xFFFF; break;
             default: fmt::print("{0:#x} Invalid RAM size code!\n", cartridge[0x149]);
         }
+
+        ROM.resize(rom_size);
+        RAM.resize(ram_size);
 
         //0x14A -> Destination code (region)
         fmt::print("Region: ");

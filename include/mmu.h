@@ -14,6 +14,8 @@ class MMU
         MMU();
         ~MMU() {}
 
+        void init();
+
         uint8_t read(uint16_t address);
         void write(uint16_t address, uint8_t value);
 
@@ -32,8 +34,17 @@ class MMU
         std::vector<uint8_t> RAM;
         std::vector<uint8_t> VRAM;
 
+        std::vector<uint8_t> ROM;
+
         std::vector<uint8_t> cartridge;
 
         bool mode_flag {};
+
+        int rom_size {};
+        int ram_size {};
+
+        int zero_bank {};
+
+        uint8_t ram_bank_no {};
 };
 #endif 
