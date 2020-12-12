@@ -40,6 +40,7 @@ class CPU
 
         /*flags*/
         bool flag_zero {};
+        bool flag_n {};
         bool flag_add_sub {};
         bool flag_half_carry {};
         bool flag_carry {};
@@ -52,11 +53,15 @@ class CPU
         /*addressing modes*/
 
         /*instructions*/
+        //8bit load
         void ld_nn(uint8_t *reg);//ld nn, n
         void ld_r(uint8_t *r1, uint8_t r2);//ld r1, r2; ld r1, (r2)
         void ld_mem_r(uint16_t *r1, uint8_t r2);//ld (r1), r2
         void ld_a(uint16_t value);//ld A, (r2)
         void ld_n(uint8_t *reg);// ld reg, A; ld (reg), A
+
+        //16bit load
+        void ld_nn(uint16_t *reg, uint16_t value);//ld 16 bit reg, 16 bit value 
         /*instructions*/
 };
 

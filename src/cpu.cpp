@@ -19,6 +19,7 @@ void CPU::execute(uint8_t opcode)
 {
     switch(opcode)
     {
+        /*8 bit loads*/
         case 0x06:
                 {
                     immediate();
@@ -772,7 +773,119 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        /*16 bit loads*/
 
+        case 0x01:
+                {
+                    //takes 12 cycles
+                    reg_pc.reg++;
+                    uint16_t lo = bus->read(reg_pc.reg);
+
+                    reg_pc.reg++;
+                    uint16_t hi = bus->read(reg_pc.reg);
+
+                    uint16_t nn = (hi << 8) | lo;
+
+                    ld_nn(&reg_bc.reg, nn);
+
+                    cycles += 12;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD BC, nn\n");     
+                }
+                break;
+        case 0x11:
+                {
+                    //takes 12 cycles
+                     reg_pc.reg++;
+                    uint16_t lo = bus->read(reg_pc.reg);
+
+                    reg_pc.reg++;
+                    uint16_t hi = bus->read(reg_pc.reg);
+
+                    uint16_t nn = (hi << 8) | lo;
+
+                    ld_nn(&reg_de.reg, nn);
+
+                    cycles += 12;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD DE, nn\n");                        
+                }
+                break;
+        case 0x21:
+                {
+                    //takes 12 cycles
+                     reg_pc.reg++;
+                    uint16_t lo = bus->read(reg_pc.reg);
+
+                    reg_pc.reg++;
+                    uint16_t hi = bus->read(reg_pc.reg);
+
+                    uint16_t nn = (hi << 8) | lo;
+
+                    ld_nn(&reg_hl.reg, nn);
+
+                    cycles += 12;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD HL, nn\n");                        
+                }
+                break;
+        case 0x31:
+                {
+                    //takes 12 cycles
+                    reg_pc.reg++;
+                    uint16_t lo = bus->read(reg_pc.reg);
+
+                    reg_pc.reg++;
+                    uint16_t hi = bus->read(reg_pc.reg);
+
+                    uint16_t nn = (hi << 8) | lo;
+
+                    ld_nn(&reg_sp.reg, nn);
+
+                    cycles += 12;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD SP, nn\n");                        
+                }
+                break;
+
+        case 0xF9:
+                {
+                    //takes 8 cycles
+                    ld_nn(&reg_sp.reg, reg_hl.reg);
+                    cycles += 8;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD SP, HL\n");                                    
+                }
+                break;
+
+        case 0xF8:
+                {
+                    //takes 12 cycles
+                    immediate();
+                    uint16_t n = bus->read(reg_pc.reg);
+
+                    reg_hl.reg = reg_sp.reg + n;
+
+                    flag_zero = false;
+                    flag_n = false;
+
+                    if(reg_hl.reg > 0xFFFF)
+                    {
+                        flag_carry = true;
+                    }
+                    else
+                        flag_carry = false;
+
+                    //TODO
+                    //add h flag operation
+
+                    cycles += 12;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LDHL SP, n\n");                                    
+                }
+                break;
 
 
 
@@ -832,6 +945,14 @@ void CPU::ld_mem_r(uint16_t *r1, uint8_t r2)
     //temp
     bus->write(*r1, r2);
     cycles += 4;
+    reg_pc.reg++;
+}
+
+
+//LD n, nn
+void CPU::ld_nn(uint16_t *reg, uint16_t value)
+{
+    *reg = value;
     reg_pc.reg++;
 }
 /*instructions*/
