@@ -891,6 +891,137 @@ void CPU::execute(uint8_t opcode)
                     fmt::print(fg(fmt::color::dark_green), "LDHL SP, n\n");                                    
                 }
                 break;
+        
+        case 0x08:
+                {
+                    //takes 20 cycles!
+                    reg_pc.reg++;
+                    uint16_t lo = bus->read(reg_pc.reg);
+
+                    reg_pc.reg++;
+                    uint16_t hi = bus->read(reg_pc.reg);
+
+                    uint16_t nn = (hi << 8) | lo;
+
+                    bus->write(nn, reg_sp.lo);
+                    nn += 1;
+                    bus->write(nn, reg_sp.hi);
+
+                    cycles += 20;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "LD (nn), SP\n");                                                     
+                }
+                break;
+
+        /*stack push opcodes*/
+        case 0xF5:
+                {
+                    //takes 16 cycles!
+                    push(reg_af.hi);
+                    push(reg_af.lo);
+
+                    cycles += 16;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "PUSH AF\n");                                    
+                }
+                break;
+        case 0xC5:
+                {
+                    //takes 16 cycles!
+                    push(reg_bc.hi);
+                    push(reg_bc.lo);
+
+                    cycles += 16;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "PUSH BC\n");                 
+                }
+                break;
+        case 0xD5:
+                {
+                    //takes 16 cycles!
+                    push(reg_de.hi);
+                    push(reg_de.lo);
+
+                    cycles += 16;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "PUSH DE\n");                 
+                }
+                break;
+        case 0xE5:
+                {
+                    //takes 16 cycles!
+                    push(reg_hl.hi);
+                    push(reg_hl.lo);
+
+                    cycles += 16;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "PUSH HL\n");                 
+                }
+                break;
+
+        /*stack pop opcodes*/
+        case 0xF1:
+                {
+                    //takes 12 cycles
+                    reg_af.lo = pop();
+                    reg_af.hi = pop();
+
+                    cycles += 12;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "POP AF\n");                 
+                }
+                break;
+        case 0xC1:
+                {
+                    //takes 12 cycles
+                    reg_bc.lo = pop();
+                    reg_bc.hi = pop();
+
+                    cycles += 12;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "POP BC\n");                 
+                }
+                break;
+        case 0xD1:
+                {
+                    //takes 12 cycles
+                    reg_de.lo = pop();
+                    reg_de.hi = pop();
+
+                    cycles += 12;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "POP DE\n");                 
+                }
+                break;
+        case 0xF1:
+                {
+                    //takes 12 cycles
+                    reg_hl.lo = pop();
+                    reg_hl.hi = pop();
+
+                    cycles += 12;
+
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "POP HL\n");                 
+                }
+                break;
 
 
 
@@ -901,6 +1032,31 @@ void CPU::execute(uint8_t opcode)
             }
     }
 }
+
+/*stack functions*/
+void CPU::setSP(uint16_t address)
+{
+    reg_sp.reg = address;
+}
+
+uint16_t CPU::getSP()
+{
+    return reg_sp.reg;
+}
+
+void CPU::push(uint8_t value)
+{
+    bus->write(reg_sp.reg, value);
+    reg_sp.reg -= 1;
+}
+
+uint8_t CPU::pop()
+{
+    reg_sp.reg += 1;
+    return bus->read(reg_sp.reg);
+}
+
+/*stack functions*/
 
 /*addressing modes*/
 void CPU::immediate()

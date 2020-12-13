@@ -29,6 +29,9 @@ class CPU
         uint16_t getPC();
         void setPC(uint16_t address);
 
+        uint16_t getSP();
+        void setSP(uint16_t address);
+
     private:
         /*registers*/
         Register reg_af {};
@@ -47,6 +50,12 @@ class CPU
 
 
         Bus *bus = nullptr;
+
+        /*stack functions*/
+        void push(uint8_t value);
+        uint8_t pop();
+        /*stack functions*/
+
 
         /*addressing modes*/
         void immediate();

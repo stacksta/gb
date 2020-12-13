@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
     uint8_t opcode{};
 
     cpu.setPC(0x100);
+    cpu.setSP(0xFFFE);
+    
     do {
         //fetch
         opcode = bus.read(cpu.getPC());
