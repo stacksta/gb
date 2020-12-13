@@ -1009,7 +1009,7 @@ void CPU::execute(uint8_t opcode)
                     fmt::print(fg(fmt::color::dark_green), "POP DE\n");                 
                 }
                 break;
-        case 0xF1:
+        case 0xE1:
                 {
                     //takes 12 cycles
                     reg_hl.lo = pop();
