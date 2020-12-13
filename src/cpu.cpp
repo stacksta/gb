@@ -876,8 +876,13 @@ void CPU::execute(uint8_t opcode)
                     else
                         flag_carry = false;
 
-                    //TODO
-                    //add h flag operation
+                    //H indicates carry for lower 4bits of the result?
+                    if((reg_hl.lo & 0xF) + (n & 0xF) > 0xF)
+                    {
+                        flag_half_carry = true;
+                    }
+                    else 
+                        flag_half_carry = false;
 
                     cycles += 12;
 
