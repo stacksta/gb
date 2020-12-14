@@ -73,7 +73,7 @@ class CPU
         void ld_nn(uint16_t *reg, uint16_t value);//ld 16 bit reg, 16 bit value 
         
         
-        void add_byte(uint8_t reg);// add A, reg
+        void add_byte(uint8_t reg, bool carry);// add A, reg; adc A, reg
         
         /*instructions*/
 };
