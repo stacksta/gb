@@ -1023,6 +1023,78 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        /*8 bit ALU*/
+        case 0x87: 
+                {
+                    add_byte(reg_af.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, A\n");                 
+                }
+                break;
+        case 0x80: 
+                {
+                    add_byte(reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, B\n");                 
+                }
+                break;
+        case 0x81: 
+                {
+                    add_byte(reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, C\n");                 
+                }
+                break;
+        case 0x82: 
+                {
+                    add_byte(reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, D\n");                 
+                }
+                break;
+        case 0x83: 
+                {
+                    add_byte(reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, E\n");                 
+                }
+                break;
+        case 0x84: 
+                {
+                    add_byte(reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, H\n");                 
+                }
+                break;
+        case 0x85: 
+                {
+                    add_byte(reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, L\n");                 
+                }
+                break;
+        case 0x86: 
+                {
+                    //takes 8 cycles
+                    add_byte(bus->read(reg_hl.reg));
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, (HL)\n");                 
+                }
+                break;
+        case 0xC6: 
+                {
+                    //takes 8 cycles
+                    reg_pc.reg++;
+                    uint8_t n = bus->read(reg_pc.reg);
+                    add_byte(n);
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD A, {0:#x}\n", n);                 
+                }
+                break;
 
 
         default:
@@ -1116,4 +1188,25 @@ void CPU::ld_nn(uint16_t *reg, uint16_t value)
     *reg = value;
     reg_pc.reg++;
 }
+
+//ADD A, reg
+void CPU::add_byte(uint8_t reg)
+{
+    reg_af.hi = reg_af.hi + reg;
+
+    if(reg_af.hi == 0x00)
+        flag_zero = true;
+    
+    flag_n = false;
+
+    if((reg_af.hi & 0xF) + (reg & 0xF) > 0xF)
+        flag_half_carry = true;
+
+    if((reg_af.hi & 0xFF) + (reg & 0xFF) > 0xFF)
+        flag_carry = true;
+
+    cycles += 4;
+    reg_pc.reg++;
+}
+
 /*instructions*/
