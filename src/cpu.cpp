@@ -1024,6 +1024,7 @@ void CPU::execute(uint8_t opcode)
                 break;
 
         /*8 bit ALU*/
+        //8 bit add opcodes
         case 0x87: 
                 {
                     add_byte(reg_af.hi, false);
@@ -1169,6 +1170,79 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        //8 bit sub opcodes
+        case 0x97:
+                {
+                    sub_byte(reg_af.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB A\n");                 
+                }
+                break;
+        case 0x90:
+                {
+                    sub_byte(reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB B\n");                 
+                }
+                break;
+        case 0x91:
+                {
+                    sub_byte(reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB C\n");                 
+                }
+                break;
+        case 0x92:
+                {
+                    sub_byte(reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB D\n");                 
+                }
+                break;
+        case 0x93:
+                {
+                    sub_byte(reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB E\n");                 
+                }
+                break;
+        case 0x94:
+                {
+                    sub_byte(reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB H\n");                 
+                }
+                break;
+        case 0x95:
+                {
+                    sub_byte(reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB L\n");                 
+                }
+                break;
+        case 0x96:
+                {
+                    //takes 8 cycles
+                    sub_byte(bus->read(reg_hl.reg));
+
+                    cycles += 4;
+                    
+                    fmt::print(fg(fmt::color::dark_green), "SUB (HL)\n");                 
+                }
+                break;
+        case 0xD6:
+                {
+                    //takes 8 cycles
+                    reg_pc.reg++;
+                    uint8_t n = bus->read(reg_pc.reg);
+                    sub_byte(n);
+
+                    fmt::print(fg(fmt::color::dark_green), "SUB {0:#x}\n", n);                 
+                }
+                break;
+
+
+
         default:
             {
                 fmt::print(fg(fmt::color::crimson), "Opcode {0:#x} not implemented!\n", opcode);
@@ -1291,6 +1365,26 @@ void CPU::add_byte(uint8_t reg, bool carry)
             flag_carry = true;  
     }
 
+
+    cycles += 4;
+    reg_pc.reg++;
+}
+
+//SUB reg
+void CPU::sub_byte(uint8_t reg)
+{
+    reg_af.hi = reg_af.hi - reg;
+
+    if(reg_af.hi == 0)
+        flag_zero = true;
+    
+    flag_n = true;
+
+    if((reg & 0xF) > (reg_af.hi & 0xF))
+        flag_half_carry = true;
+
+    if(reg > reg_af.hi)
+        flag_carry = true;
 
     cycles += 4;
     reg_pc.reg++;

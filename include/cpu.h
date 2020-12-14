@@ -72,8 +72,9 @@ class CPU
         //16bit load
         void ld_nn(uint16_t *reg, uint16_t value);//ld 16 bit reg, 16 bit value 
         
-        
+        //8 bit ALU
         void add_byte(uint8_t reg, bool carry);// add A, reg; adc A, reg
+        void sub_byte(uint8_t reg);// sub reg; A -> A - reg
         
         /*instructions*/
 };
