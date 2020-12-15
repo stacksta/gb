@@ -1173,49 +1173,49 @@ void CPU::execute(uint8_t opcode)
         //8 bit sub opcodes
         case 0x97:
                 {
-                    sub_byte(reg_af.hi);
+                    sub_byte(reg_af.hi, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB A\n");                 
                 }
                 break;
         case 0x90:
                 {
-                    sub_byte(reg_bc.hi);
+                    sub_byte(reg_bc.hi, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB B\n");                 
                 }
                 break;
         case 0x91:
                 {
-                    sub_byte(reg_bc.lo);
+                    sub_byte(reg_bc.lo, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB C\n");                 
                 }
                 break;
         case 0x92:
                 {
-                    sub_byte(reg_de.hi);
+                    sub_byte(reg_de.hi, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB D\n");                 
                 }
                 break;
         case 0x93:
                 {
-                    sub_byte(reg_de.lo);
+                    sub_byte(reg_de.lo, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB E\n");                 
                 }
                 break;
         case 0x94:
                 {
-                    sub_byte(reg_hl.hi);
+                    sub_byte(reg_hl.hi, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB H\n");                 
                 }
                 break;
         case 0x95:
                 {
-                    sub_byte(reg_hl.lo);
+                    sub_byte(reg_hl.lo, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB L\n");                 
                 }
@@ -1223,7 +1223,7 @@ void CPU::execute(uint8_t opcode)
         case 0x96:
                 {
                     //takes 8 cycles
-                    sub_byte(bus->read(reg_hl.reg));
+                    sub_byte(bus->read(reg_hl.reg), false);
 
                     cycles += 4;
                     
@@ -1235,12 +1235,75 @@ void CPU::execute(uint8_t opcode)
                     //takes 8 cycles
                     reg_pc.reg++;
                     uint8_t n = bus->read(reg_pc.reg);
-                    sub_byte(n);
+                    sub_byte(n, false);
 
                     fmt::print(fg(fmt::color::dark_green), "SUB {0:#x}\n", n);                 
                 }
                 break;
 
+        
+        //8 bit subc opcodes
+        case 0x9F:
+                {
+                    sub_byte(reg_af.hi, true);
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC A\n");                     
+                }
+                break;
+        case 0x98:
+                {
+                    sub_byte(reg_bc.hi, true);
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC B\n");                 
+                }
+                break;
+        case 0x99:
+                {
+                    sub_byte(reg_bc.lo, true);
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC C\n");                 
+                }
+                break;
+        case 0x9A:
+                {
+                    sub_byte(reg_de.hi, true);
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC D\n");                 
+                }
+                break;
+        case 0x9B:
+                {
+                    sub_byte(reg_de.lo, true);
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC E\n");                 
+                }
+                break;
+        case 0x9C:
+                {
+                    sub_byte(reg_hl.hi, true);
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC H\n");                 
+                }
+                break;
+        case 0x9D:
+                {
+                    sub_byte(reg_hl.lo, true);
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC L\n");                 
+                }
+                break;
+        case 0x9E:
+                {
+                    //takes 8 cycles
+                    sub_byte(bus->read(reg_hl.reg), true);
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "SBC (HL)\n");                 
+                }
+                break;
+
+    
 
 
         default:
@@ -1371,8 +1434,15 @@ void CPU::add_byte(uint8_t reg, bool carry)
 }
 
 //SUB reg
-void CPU::sub_byte(uint8_t reg)
+void CPU::sub_byte(uint8_t reg, bool carry)
 {
+    uint8_t carry_val = 0;
+    if(carry)
+    {
+        carry_val = (flag_carry) ? 1 : 0;
+        reg = reg + carry;// A = A - (reg+carry)
+    }
+
     reg_af.hi = reg_af.hi - reg;
 
     if(reg_af.hi == 0)
