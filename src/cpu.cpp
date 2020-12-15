@@ -1449,6 +1449,80 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        //8 bit XOR opcodes
+        case 0xAF:
+                {
+                    xor_byte(reg_af.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR A\n");   
+                }
+                break;
+        case 0xA8:
+                {
+                    xor_byte(reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR B\n");   
+                }
+                break;
+        case 0xA9:
+                {
+                    xor_byte(reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR C\n");   
+                }
+                break;
+        case 0xAA:
+                {
+                    xor_byte(reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR D\n");   
+                }
+                break;
+        case 0xAB:
+                {
+                    xor_byte(reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR E\n");   
+                }
+                break;
+        case 0xAC:
+                {
+                    xor_byte(reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR H\n");   
+                }
+                break;
+        case 0xAD:
+                {
+                    xor_byte(reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR L\n");   
+                }
+                break;
+        case 0xAE:
+                {
+                    //takes 8 cycles
+                    xor_byte(bus->read(reg_hl.hi));
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR (HL)\n");   
+                }
+                break;
+        case 0xEE:
+                {
+                    //takes 8 cycles
+                    reg_pc.reg++;
+                    uint8_t n = bus->read(reg_pc.reg);
+                    xor_byte(n);
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "XOR {0:#x}\n", n);   
+                }
+                break;
+
+
 
         default:
             {
@@ -1626,6 +1700,24 @@ void CPU::and_byte(uint8_t reg)
 void CPU::or_byte(uint8_t reg)
 {
     reg_af.hi = reg_af.hi | reg;
+
+    if(reg_af.hi == 0)
+        flag_zero = true;
+
+    flag_n = false;
+
+    flag_half_carry = false;
+
+    flag_carry = false;
+
+    cycles += 4;
+    reg_pc.reg++;
+}
+
+//XOR reg
+void CPU::xor_byte(uint8_t reg)
+{
+    reg_af.hi = reg_af.hi ^ reg;
 
     if(reg_af.hi == 0)
         flag_zero = true;
