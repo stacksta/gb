@@ -75,6 +75,8 @@ class CPU
         //8 bit ALU
         void add_byte(uint8_t reg, bool carry);// add A, reg; adc A, reg
         void sub_byte(uint8_t reg, bool carry);// sub reg; A -> A - reg; sbc reg; A -> A - reg - carry; A -> A - (reg+carry);
+
+        void and_byte(uint8_t reg);// A & reg;
         
         /*instructions*/
 };

@@ -1303,8 +1303,79 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
-    
+        //8 bit AND opcodes
+        case 0xA7:
+                {
+                    and_byte(reg_af.hi);
 
+                    fmt::print(fg(fmt::color::dark_green), "AND A\n");                             
+                }
+                break;
+        case 0xA0:
+                {
+                    and_byte(reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "AND B\n");                             
+                }
+                break;
+        case 0xA1:
+                {
+                    and_byte(reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "AND C\n");                             
+                }
+                break;
+        case 0xA2:
+                {
+                    and_byte(reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "AND D\n");                             
+                }
+                break;
+        case 0xA3:
+                {
+                    and_byte(reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "AND E\n");                             
+                }
+                break;
+        case 0xA4:
+                {
+                    and_byte(reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "AND H\n");                             
+                }
+                break;
+        case 0xA5:
+                {
+                    and_byte(reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "AND L\n");                             
+                }
+                break;
+        case 0xA6:
+                {
+                    //takes 8 cycles
+                    and_byte(bus->read(reg_hl.reg));
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "AND (HL)\n");                             
+                }
+                break;
+        case 0xE6:
+                {
+                    //takes 8 cycles
+                    reg_pc.reg++;
+                    uint8_t n = bus->read(reg_pc.reg);
+                    and_byte(n);
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "AND {0:#x}\n", n);                             
+                }
+                break;
+            
 
         default:
             {
@@ -1455,6 +1526,24 @@ void CPU::sub_byte(uint8_t reg, bool carry)
 
     if(reg > reg_af.hi)
         flag_carry = true;
+
+    cycles += 4;
+    reg_pc.reg++;
+}
+
+//AND reg
+void CPU::and_byte(uint8_t reg)
+{
+    reg_af.hi = reg_af.hi & reg;
+
+    if(reg_af.hi == 0)
+        flag_zero = true;
+
+    flag_n = false;
+
+    flag_half_carry = true;
+
+    flag_carry = false;
 
     cycles += 4;
     reg_pc.reg++;
