@@ -1375,7 +1375,80 @@ void CPU::execute(uint8_t opcode)
                     fmt::print(fg(fmt::color::dark_green), "AND {0:#x}\n", n);                             
                 }
                 break;
-            
+
+        //8 bit OR opcodes
+        case 0xB7:
+                {
+                    or_byte(reg_af.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "OR A\n");                             
+                }
+                break;
+        case 0xB0:
+                {
+                    or_byte(reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "OR B\n");                             
+                }
+                break;
+        case 0xB1:
+                {
+                    or_byte(reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "OR C\n");                             
+                }
+                break; 
+        case 0xB2:
+                {
+                    or_byte(reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "OR D\n");                             
+                }
+                break; 
+        case 0xB3:
+                {
+                    or_byte(reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "OR E\n");                             
+                }
+                break;
+        case 0xB4:
+                {
+                    or_byte(reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "OR H\n");                             
+                }
+                break;
+        case 0xB5:
+                {
+                    or_byte(reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "OR L\n");                             
+                }
+                break;
+        case 0xB6:
+                {
+                    //takes 8 cycles
+                    or_byte(bus->read(reg_hl.reg));
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "OR (HL)\n");                             
+                }
+                break;
+        case 0xF6:
+                {
+                    //takes 8 cycles
+                    reg_pc.reg++;
+                    uint8_t n = bus->read(reg_pc.reg);
+                    or_byte(reg_af.hi);
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "OR {0:#x}\n", n);                             
+                }
+                break;
+
 
         default:
             {
@@ -1542,6 +1615,24 @@ void CPU::and_byte(uint8_t reg)
     flag_n = false;
 
     flag_half_carry = true;
+
+    flag_carry = false;
+
+    cycles += 4;
+    reg_pc.reg++;
+}
+
+//OR reg
+void CPU::or_byte(uint8_t reg)
+{
+    reg_af.hi = reg_af.hi | reg;
+
+    if(reg_af.hi == 0)
+        flag_zero = true;
+
+    flag_n = false;
+
+    flag_half_carry = false;
 
     flag_carry = false;
 
