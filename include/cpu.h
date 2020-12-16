@@ -79,6 +79,8 @@ class CPU
         void and_byte(uint8_t reg);// A & reg;
         void or_byte(uint8_t reg);// A | reg;
         void xor_byte(uint8_t reg);// A ^ reg;
+
+        void cp_byte(uint8_t reg);// compare A with n (A - reg)
         
         /*instructions*/
 };

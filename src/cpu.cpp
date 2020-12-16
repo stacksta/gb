@@ -1522,6 +1522,79 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        //8 bit compare opcodes
+        case 0xBF:
+                {
+                    cp_byte(reg_af.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "CP A\n");   
+                }
+                break;
+        case 0xB8:
+                {
+                    cp_byte(reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "CP B\n");   
+                }
+                break;
+        case 0xB9:
+                {
+                    cp_byte(reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "CP C\n");   
+                }
+                break;
+        case 0xBA:
+                {
+                    cp_byte(reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "CP D\n");   
+                }
+                break;
+        case 0xBB:
+                {
+                    cp_byte(reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "CP E\n");   
+                }
+                break;
+        case 0xBC:
+                {
+                    cp_byte(reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "CP H\n");   
+                }
+                break;
+        case 0xBD:
+                {
+                    cp_byte(reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "CP L\n");   
+                }
+                break;
+        case 0xBE:
+                {
+                    //takes 8 cycles
+                    cp_byte(bus->read(reg_hl.reg));
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "CP (HL)\n");   
+                }
+                break;
+        case 0xFE:
+                {
+                    //takes 8 cycles
+                    reg_pc.reg++;
+                    uint8_t n = bus->read(reg_pc.reg);
+                    cp_byte(n);
+
+                    cycles += 4;
+
+                    fmt::print(fg(fmt::color::dark_green), "CP {0:#x}\n", n);   
+                }
+                break;
+
 
 
         default:
@@ -1727,6 +1800,26 @@ void CPU::xor_byte(uint8_t reg)
     flag_half_carry = false;
 
     flag_carry = false;
+
+    cycles += 4;
+    reg_pc.reg++;
+}
+
+//CP n
+void CPU::cp_byte(uint8_t reg)
+{
+    uint8_t temp = reg_af.hi - reg;
+
+    if(temp == 0)
+        flag_zero = true;
+
+    flag_n  = true;
+
+    if((reg & 0xF) > (reg_af.hi & 0xF))
+        flag_half_carry = true;
+
+    if(reg > reg_af.hi)
+        flag_carry = true;
 
     cycles += 4;
     reg_pc.reg++;
