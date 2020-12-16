@@ -1595,6 +1595,132 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        //8 bit inc opcodes
+        case 0x3C:
+                {
+                    inc_byte(&reg_af.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC A\n");
+                }
+                break;
+        case 0x04:
+                {
+                    inc_byte(&reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC B\n");
+                }
+                break;
+        case 0x0C:
+                {
+                    inc_byte(&reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC C\n");
+                }
+                break;
+        case 0x14:
+                {
+                    inc_byte(&reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC D\n");
+                }
+                break;
+        case 0x1C:
+                {
+                    inc_byte(&reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC E\n");
+                }
+                break;
+        case 0x24:
+                {
+                    inc_byte(&reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC H\n");
+                }
+                break;
+        case 0x2C:
+                {
+                    inc_byte(&reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC L\n");
+                }
+                break;
+        case 0x34:
+                {
+                    //takes 12 cycles
+                    uint8_t value = bus->read(reg_hl.reg);
+                    inc_byte(&value);
+                    bus->write(reg_hl.reg, value);
+
+                    cycles += 8;
+
+                    fmt::print(fg(fmt::color::dark_green), "INC (HL)\n");
+                }
+                break;
+
+        //8 bit dec opcodes
+        case 0x3D:
+                {
+                    dec_byte(&reg_af.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC A\n");     
+                }
+                break;
+        case 0x05:
+                {
+                    dec_byte(&reg_bc.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC B\n");     
+                }
+                break;
+        case 0x0D:
+                {
+                    dec_byte(&reg_bc.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC C\n");     
+                }
+                break;
+        case 0x15:
+                {
+                    dec_byte(&reg_de.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC D\n");     
+                }
+                break;
+        case 0x1D:
+                {
+                    dec_byte(&reg_de.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC E\n");     
+                }
+                break;
+        case 0x25:
+                {
+                    dec_byte(&reg_hl.hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC H\n");     
+                }
+                break;
+        case 0x2D:
+                {
+                    dec_byte(&reg_hl.lo);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC L\n");     
+                }
+                break;
+        case 0x35:
+                {
+                    //takes 12 cycles
+                    uint8_t value = bus->read(reg_hl.reg);
+                    dec_byte(&value);
+                    bus->write(reg_hl.reg, value);
+
+                    cycles += 8;
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC (HL)\n");     
+                }
+                break;
+        
 
 
         default:
@@ -1825,4 +1951,38 @@ void CPU::cp_byte(uint8_t reg)
     reg_pc.reg++;
 }
 
+//INC n
+void CPU::inc_byte(uint8_t *reg)
+{
+    *reg++;
+
+    if(*reg == 0)
+        flag_zero = true;
+
+    flag_n = false;
+
+    //                                        ----
+    if((*reg & 0xF) == 0) // 1111 + 1 -> 0001 0000, we check if its zero
+        flag_half_carry = true;
+
+    cycles += 4;
+    reg_pc.reg++;
+}
+
+//DEC n
+void CPU::dec_byte(uint8_t *reg)
+{
+    *reg--;
+
+    if(*reg == 0)
+        flag_zero = true;
+
+    flag_n = true;
+    
+    if((*reg & 0xF) == 0xF) // 1111 -> no borrow
+        flag_half_carry = true;
+
+    cycles += 4;
+    reg_pc.reg++;
+}
 /*instructions*/

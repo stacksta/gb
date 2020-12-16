@@ -81,6 +81,8 @@ class CPU
         void xor_byte(uint8_t reg);// A ^ reg;
 
         void cp_byte(uint8_t reg);// compare A with n (A - reg)
+        void inc_byte(uint8_t *reg);// increment reg
+        void dec_byte(uint8_t *reg);// decrement reg
         
         /*instructions*/
 };
