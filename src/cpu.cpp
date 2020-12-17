@@ -1764,9 +1764,13 @@ void CPU::execute(uint8_t opcode)
 
                     if((reg_sp.reg & 0xF) + (n & 0xF) > 0xF)
                         flag_half_carry = true;
+                    else 
+                        flag_half_carry = false;
 
                     if((reg_sp.reg & 0xFF) + (n & 0xFF) > 0xFF)
                         flag_carry = true;
+                    else 
+                        flag_carry = false;
 
                     cycles += 16;
 
@@ -1831,6 +1835,16 @@ void CPU::execute(uint8_t opcode)
                     dec_word(&reg_sp.reg);
 
                     fmt::print(fg(fmt::color::dark_green), "DEC SP\n");     
+                }
+                break;
+
+
+        //DAA opcode
+        case 0x27:
+                {
+                    daa();
+
+                    fmt::print(fg(fmt::color::dark_green), "DAA\n");     
                 }
                 break;
 
@@ -1934,10 +1948,6 @@ void CPU::ld_nn(uint16_t *reg, uint16_t value)
 //ADD A, reg
 void CPU::add_byte(uint8_t reg, bool carry)
 {
-    // if(!carry)
-    //     reg_af.hi = reg_af.hi + reg;
-    // else 
-    //     reg_af.hi = reg_af.hi + reg;
 
     if(reg_af.hi == 0x00)
         flag_zero = true;
@@ -1948,9 +1958,13 @@ void CPU::add_byte(uint8_t reg, bool carry)
     {
         if((reg_af.hi & 0xF) + (reg & 0xF) > 0xF)
             flag_half_carry = true;
+        else 
+            flag_half_carry = false;
 
         if((reg_af.hi & 0xFF) + (reg & 0xFF) > 0xFF)
             flag_carry = true;
+        else 
+            flag_carry = false;
 
         reg_af.hi = reg_af.hi + reg;
     }
@@ -1958,9 +1972,13 @@ void CPU::add_byte(uint8_t reg, bool carry)
     {
         if((reg_af.hi & 0xF) + (reg & 0xF) + (flag_carry & 0xF)> 0xF)
             flag_half_carry = true;
+        else 
+            flag_half_carry = false;
 
         if((reg_af.hi & 0xFF) + (reg & 0xFF) + (flag_carry & 0xFF) > 0xFF)
-            flag_carry = true;  
+            flag_carry = true; 
+        else 
+            flag_carry = false; 
 
         reg_af.hi = reg_af.hi + reg + flag_carry;
     }
@@ -1983,14 +2001,20 @@ void CPU::sub_byte(uint8_t reg, bool carry)
 
     if(reg_af.hi == 0)
         flag_zero = true;
+    else 
+        flag_zero = false;
     
     flag_n = true;
 
     if((reg & 0xF) > (reg_af.hi & 0xF))
         flag_half_carry = true;
+    else 
+        flag_half_carry = false;
 
     if(reg > reg_af.hi)
         flag_carry = true;
+    else 
+        flag_carry = false;
 
     reg_af.hi = reg_af.hi - reg;
 
@@ -2005,6 +2029,8 @@ void CPU::and_byte(uint8_t reg)
 
     if(reg_af.hi == 0)
         flag_zero = true;
+    else 
+        flag_zero = false;
 
     flag_n = false;
 
@@ -2023,6 +2049,8 @@ void CPU::or_byte(uint8_t reg)
 
     if(reg_af.hi == 0)
         flag_zero = true;
+    else 
+        flag_zero = false;
 
     flag_n = false;
 
@@ -2041,6 +2069,8 @@ void CPU::xor_byte(uint8_t reg)
 
     if(reg_af.hi == 0)
         flag_zero = true;
+    else 
+        flag_zero = false;
 
     flag_n = false;
 
@@ -2059,14 +2089,20 @@ void CPU::cp_byte(uint8_t reg)
 
     if(temp == 0)
         flag_zero = true;
+    else 
+        flag_zero = false;
 
     flag_n  = true;
 
     if((reg & 0xF) > (reg_af.hi & 0xF))
         flag_half_carry = true;
+    else 
+        flag_half_carry = false;
 
     if(reg > reg_af.hi)
         flag_carry = true;
+    else 
+        flag_carry = false;
 
     cycles += 4;
     reg_pc.reg++;
@@ -2079,12 +2115,16 @@ void CPU::inc_byte(uint8_t *reg)
 
     if(*reg == 0)
         flag_zero = true;
+    else 
+        flag_zero = false;
 
     flag_n = false;
 
     //                                        ----
     if((*reg & 0xF) == 0) // 1111 + 1 -> 0001 0000, we check if its zero
         flag_half_carry = true;
+    else 
+        flag_half_carry = false;
 
     cycles += 4;
     reg_pc.reg++;
@@ -2097,11 +2137,15 @@ void CPU::dec_byte(uint8_t *reg)
 
     if(*reg == 0)
         flag_zero = true;
+    else 
+        flag_zero = false;
 
     flag_n = true;
     
     if((*reg & 0xF) == 0xF) // 1111 -> no borrow
         flag_half_carry = true;
+    else 
+        flag_half_carry = false;
 
     cycles += 4;
     reg_pc.reg++;
@@ -2116,9 +2160,13 @@ void CPU::add_word(uint16_t value)
     //0111'1111'1111 -> 0 -> 11th bit
     if((reg_hl.reg & 0x0FFF) + (value & 0x0FFF) > 0x0FFF)
         flag_half_carry = true;
+    else 
+        flag_half_carry = false;
 
     if(reg_hl.reg + value > 0xFFFF)
         flag_carry = true;
+    else 
+        flag_carry = false;
 
     reg_hl.reg = reg_hl.reg + value;
 
@@ -2141,6 +2189,45 @@ void CPU::dec_word(uint16_t *reg)
     *reg--;
 
     cycles += 8;
+    reg_pc.reg++;
+}
+
+//DAA
+//https://forums.nesdev.com/viewtopic.php?t=15944
+void CPU::daa()
+{
+    //after an addition, adjust if half carry occurred or if result is out of bounds
+    if(!flag_n)
+    {
+        if(flag_carry || reg_af.hi > 0x99)
+        {
+            reg_af.hi = reg_af.hi + 0x60;
+            flag_carry = true;
+        }
+        if(flag_half_carry || (reg_af.hi & 0xF) > 0x9)
+            reg_af.hi = reg_af.hi + 0x6;
+    }
+    //after subtraction, only adjust if half carry occurred
+    else 
+    {
+        if(flag_carry)
+        {
+            reg_af.hi = reg_af.hi - 0x60;
+        }
+        if(flag_half_carry)
+        {
+            reg_af.hi = reg_af.hi - 0x6;
+        }
+    }
+
+    if(reg_af.hi == 0)
+        flag_zero = true;
+    else 
+        flag_zero = false;
+
+    flag_half_carry = false;
+
+    cycles += 4;
     reg_pc.reg++;
 }
 /*instructions*/

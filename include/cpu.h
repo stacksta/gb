@@ -88,6 +88,8 @@ class CPU
         void add_word(uint16_t value);// ADD HL, reg;
         void inc_word(uint16_t *reg);// INC reg;
         void dec_word(uint16_t *reg);// DEC reg;
+
+        void daa();//decimal adjust register A
         
         /*instructions*/
 };
