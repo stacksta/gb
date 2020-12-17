@@ -1720,6 +1720,38 @@ void CPU::execute(uint8_t opcode)
                     fmt::print(fg(fmt::color::dark_green), "DEC (HL)\n");     
                 }
                 break;
+
+        //16 bit ADD opcodes
+        case 0x09:
+                {
+                    add_word(reg_bc.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD HL, BC\n");     
+                }
+                break;
+        case 0x19:
+                {
+                    add_word(reg_de.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD HL, DE\n");     
+                }
+                break;
+        case 0x29:
+                {
+                    add_word(reg_hl.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD HL, HL\n");     
+                }
+                break;
+        case 0x39:
+                {
+                    add_word(reg_sp.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD HL, SP\n");     
+                }
+                break;
+
+        
         
 
 
@@ -1818,10 +1850,10 @@ void CPU::ld_nn(uint16_t *reg, uint16_t value)
 //ADD A, reg
 void CPU::add_byte(uint8_t reg, bool carry)
 {
-    if(!carry)
-        reg_af.hi = reg_af.hi + reg;
-    else 
-        reg_af.hi = reg_af.hi + reg;
+    // if(!carry)
+    //     reg_af.hi = reg_af.hi + reg;
+    // else 
+    //     reg_af.hi = reg_af.hi + reg;
 
     if(reg_af.hi == 0x00)
         flag_zero = true;
@@ -1835,6 +1867,8 @@ void CPU::add_byte(uint8_t reg, bool carry)
 
         if((reg_af.hi & 0xFF) + (reg & 0xFF) > 0xFF)
             flag_carry = true;
+
+        reg_af.hi = reg_af.hi + reg;
     }
     else 
     {
@@ -1843,6 +1877,8 @@ void CPU::add_byte(uint8_t reg, bool carry)
 
         if((reg_af.hi & 0xFF) + (reg & 0xFF) + (flag_carry & 0xFF) > 0xFF)
             flag_carry = true;  
+
+        reg_af.hi = reg_af.hi + reg + flag_carry;
     }
 
 
@@ -1860,7 +1896,6 @@ void CPU::sub_byte(uint8_t reg, bool carry)
         reg = reg + carry;// A = A - (reg+carry)
     }
 
-    reg_af.hi = reg_af.hi - reg;
 
     if(reg_af.hi == 0)
         flag_zero = true;
@@ -1872,6 +1907,8 @@ void CPU::sub_byte(uint8_t reg, bool carry)
 
     if(reg > reg_af.hi)
         flag_carry = true;
+
+    reg_af.hi = reg_af.hi - reg;
 
     cycles += 4;
     reg_pc.reg++;
@@ -1985,4 +2022,24 @@ void CPU::dec_byte(uint8_t *reg)
     cycles += 4;
     reg_pc.reg++;
 }
+
+
+void CPU::add_word(uint16_t value)
+{
+
+    flag_n = false;
+
+    //0111'1111'1111 -> 0 -> 11th bit
+    if((reg_hl.reg & 0x0FFF) + (value & 0x0FFF) > 0x0FFF)
+        flag_half_carry = true;
+
+    if(reg_hl.reg + value > 0xFFFF)
+        flag_carry = true;
+
+    reg_hl.reg = reg_hl.reg + value;
+
+    cycles += 8;
+    reg_pc.reg++;
+}
+
 /*instructions*/

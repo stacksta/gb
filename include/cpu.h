@@ -83,6 +83,9 @@ class CPU
         void cp_byte(uint8_t reg);// compare A with n (A - reg)
         void inc_byte(uint8_t *reg);// increment reg
         void dec_byte(uint8_t *reg);// decrement reg
+
+        //16 bit ALU
+        void add_word(uint16_t value);// ADD HL, reg;
         
         /*instructions*/
 };
