@@ -1751,6 +1751,59 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        case 0xE8:
+                {
+                    //takes 16 cycles
+                    immediate();
+                    uint16_t n = bus->read(reg_pc.reg);
+
+                    reg_sp.reg = reg_sp.reg + n;
+
+                    flag_zero = false;
+                    flag_n = false;
+
+                    if((reg_sp.reg & 0xF) + (n & 0xF) > 0xF)
+                        flag_half_carry = true;
+
+                    if((reg_sp.reg & 0xFF) + (n & 0xFF) > 0xFF)
+                        flag_carry = true;
+
+                    cycles += 16;
+
+                    fmt::print(fg(fmt::color::dark_green), "ADD SP, {0:#x}\n", n);     
+                }
+                break;
+
+        //16 bit increment opcodes
+        case 0x03:
+                {
+                    inc_word(&reg_bc.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC BC\n");     
+                }
+                break;
+        case 0x13:
+                {
+                    inc_word(&reg_de.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC DE\n");     
+                }
+                break;
+        case 0x23:
+                {
+                    inc_word(&reg_hl.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC HL\n");     
+                }
+                break;
+        case 0x33:
+                {
+                    inc_word(&reg_sp.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "INC SP\n");     
+                }
+                break;
+
         
         
 
@@ -2023,7 +2076,7 @@ void CPU::dec_byte(uint8_t *reg)
     reg_pc.reg++;
 }
 
-
+//ADD HL, reg
 void CPU::add_word(uint16_t value)
 {
 
@@ -2037,6 +2090,15 @@ void CPU::add_word(uint16_t value)
         flag_carry = true;
 
     reg_hl.reg = reg_hl.reg + value;
+
+    cycles += 8;
+    reg_pc.reg++;
+}
+
+//INC nn
+void CPU::inc_word(uint16_t *reg)
+{
+    *reg++;
 
     cycles += 8;
     reg_pc.reg++;

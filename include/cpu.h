@@ -86,6 +86,7 @@ class CPU
 
         //16 bit ALU
         void add_word(uint16_t value);// ADD HL, reg;
+        void inc_word(uint16_t *reg);// INC reg;
         
         /*instructions*/
 };
