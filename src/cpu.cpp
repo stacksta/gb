@@ -1804,6 +1804,37 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        //16 bit decrement opcodes
+        case 0x0B:
+                {
+                    dec_word(&reg_bc.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC BC\n");     
+                }
+                break;
+        case 0x1B:
+                {
+                    dec_word(&reg_de.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC DE\n");     
+                }
+                break;
+        case 0x2B:
+                {
+                    dec_word(&reg_hl.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC HL\n");     
+                }
+                break;
+        case 0x3B:
+                {
+                    dec_word(&reg_sp.reg);
+
+                    fmt::print(fg(fmt::color::dark_green), "DEC SP\n");     
+                }
+                break;
+
+
         
         
 
@@ -2104,4 +2135,12 @@ void CPU::inc_word(uint16_t *reg)
     reg_pc.reg++;
 }
 
+//DEC nn
+void CPU::dec_word(uint16_t *reg)
+{
+    *reg--;
+
+    cycles += 8;
+    reg_pc.reg++;
+}
 /*instructions*/
