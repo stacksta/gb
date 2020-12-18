@@ -105,6 +105,7 @@ class CPU
 
         //jump
         void jump(uint16_t address);// JP addr
+        void jump_r(uint8_t n);//JR n -> JP PC + n
         
         /*instructions*/
 };

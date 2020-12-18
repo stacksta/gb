@@ -2151,6 +2151,85 @@ void CPU::execute(uint8_t opcode)
                     fmt::print(fg(fmt::color::dark_green), "JP (HL)\n");   
                 }
                 break;
+        //JR n opcode
+        case 0x18:
+                {
+                    immediate();
+
+                    fmt::print(fg(fmt::color::dark_green), "JR {0:#x}\n", bus->read(reg_pc.reg));   
+
+                    jump_r(bus->read(reg_pc.reg));
+                }
+                break;
+        //JR cc opcodes
+        case 0x20:
+                {
+                    immediate();
+                    fmt::print(fg(fmt::color::dark_green), "JR NZ, {0:#x}; ", bus->read(reg_pc.reg));   
+
+                    if(!flag_zero)
+                    {
+                        jump_r(bus->read(reg_pc.reg));
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
+        case 0x28:
+                {
+                    immediate();
+                    fmt::print(fg(fmt::color::dark_green), "JR Z, {0:#x}; ", bus->read(reg_pc.reg));   
+
+                    if(flag_zero)
+                    {
+                        jump_r(bus->read(reg_pc.reg));
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
+        case 0x30:
+                {
+                    immediate();
+                    fmt::print(fg(fmt::color::dark_green), "JR NC, {0:#x}; ", bus->read(reg_pc.reg));   
+
+                    if(!flag_carry)
+                    {
+                        jump_r(bus->read(reg_pc.reg));
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
+        case 0x38:
+                {
+                    immediate();
+                    fmt::print(fg(fmt::color::dark_green), "JR C, {0:#x}; ", bus->read(reg_pc.reg));   
+
+                    if(flag_carry)
+                    {
+                        jump_r(bus->read(reg_pc.reg));
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
         
 
 
@@ -2538,6 +2617,15 @@ void CPU::jump(uint16_t address)
     reg_pc.reg = address;
 
     cycles += 12;
+    reg_pc.reg++;
+}
+
+//JR n
+void CPU::jump_r(uint8_t n)
+{
+    reg_pc.reg = reg_pc.reg + n;
+
+    cycles += 8;
     reg_pc.reg++;
 }
 
