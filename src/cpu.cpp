@@ -1900,11 +1900,12 @@ void CPU::execute(uint8_t opcode)
         //HALT
         case 0x76:
                 {
+                    //TODO
+                    halt = true;
+
                     cycles += 4;
                     reg_pc.reg++;
-                    //TODO
-                    //check for interrupts
-
+                
                     fmt::print(fg(fmt::color::dark_green), "HALT\n");      
                 }
                 break;
@@ -1922,7 +1923,7 @@ void CPU::execute(uint8_t opcode)
         //DI (disable interrupts after DI is executed)
         case 0xF3:
                 {
-                    //TODO
+                    flag_IME = false;
 
                     cycles += 4;
                     reg_pc.reg++;
@@ -1933,13 +1934,101 @@ void CPU::execute(uint8_t opcode)
         //EI (enable interrupts after EI is executed)
         case 0xFB:
                 {
-                    //TODO
+                    flag_IME = true;
 
                     cycles += 4;
                     reg_pc.reg++;
 
                     fmt::print(fg(fmt::color::dark_green), "EI\n");
                 }
+                break;
+
+        //Rotates and shifts
+        //RLCA (rotate A left)
+        case 0x07:
+                {
+                    flag_carry = reg_af.hi & 80; // 0x80 -> 1000'0000
+                    reg_af.hi = reg_af.hi << 1;
+
+                    if(reg_af.hi == 0)
+                        flag_zero = true;
+                    else 
+                        flag_zero = false;
+
+                    flag_n = false;
+                    flag_half_carry = false;
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "RLCA\n");
+                }
+                break;
+        //RLA (rotate A left through carry flag)
+        case 0x17:
+                {
+                    bool msb = reg_af.hi & 0x80; // 0x80 -> 1000'0000
+                    reg_af.hi = (reg_af.hi << 1) + flag_carry;
+
+                    flag_carry = msb;
+
+                    if(reg_af.hi == 0)
+                        flag_zero = true;
+                    else 
+                        flag_zero = false;
+
+                    flag_n = false;
+                    flag_half_carry = false;
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "RLA\n");
+                }
+                break;
+        //RRCA (rotate A right)
+        case 0x0F:
+                {
+                    bool lsb = reg_af.hi & 0x1;
+                    reg_af.hi = reg_af.hi >> 1;
+
+                    flag_carry = lsb;
+
+                    if(reg_af.hi == 0)
+                        flag_zero = true;
+                    else 
+                        flag_zero = false;
+
+                    flag_n = false;
+                    flag_half_carry = false;
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "RRCA\n");
+                }
+                break;
+        //RRA (rotate A right through carry flag)
+        case 0x1F:
+                {
+                    bool lsb = reg_af.hi & 0x1;
+                    reg_af.hi = (reg_af.hi >> 1) + flag_carry;
+
+                    flag_carry = lsb;
+
+                    if(reg_af.hi == 0)
+                        flag_zero = true;
+                    else 
+                        flag_zero = false;
+
+                    flag_n = false;
+                    flag_half_carry = false;
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "RRA\n");  
+                }  
                 break;
         
 
@@ -2322,3 +2411,10 @@ void CPU::daa()
     reg_pc.reg++;
 }
 /*instructions*/
+
+/*interrupt*/
+void CPU::interrupt_handler()
+{
+
+}
+/*interrupt*/

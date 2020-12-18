@@ -44,7 +44,7 @@ class CPU
         /*flags*/
         bool flag_zero {};
         bool flag_n {};
-        bool flag_add_sub {};
+        //bool flag_add_sub {};
         bool flag_half_carry {};
         bool flag_carry {};
 
@@ -55,6 +55,18 @@ class CPU
         void push(uint8_t value);
         uint8_t pop();
         /*stack functions*/
+
+        /*interrupt*/
+        const uint16_t IF_FLAG = 0xFFFF;
+        const uint16_t IE_FLAG = 0xFF0F;
+
+        bool halt {};
+        bool flag_IME {};//interrupt flag
+
+        void interrupt_handler();
+        /*interrupt*/
+
+      
 
 
         /*addressing modes*/
