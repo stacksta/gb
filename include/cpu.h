@@ -102,6 +102,9 @@ class CPU
         void dec_word(uint16_t *reg);// DEC reg;
 
         void daa();//decimal adjust register A
+
+        //jump
+        void jump(uint16_t address);// JP addr
         
         /*instructions*/
 };

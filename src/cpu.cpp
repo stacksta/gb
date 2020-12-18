@@ -2030,6 +2030,127 @@ void CPU::execute(uint8_t opcode)
                     fmt::print(fg(fmt::color::dark_green), "RRA\n");  
                 }  
                 break;
+
+        //jump opcodes
+        //JP nn
+        case 0xC3:
+                {
+                    reg_pc.reg++;
+                    uint16_t lo = bus->read(reg_pc.reg);
+                    reg_pc.reg++;
+                    uint16_t hi = bus->read(reg_pc.reg);
+
+                    uint16_t addr = (hi << 8) | lo;
+
+                    jump(addr);
+
+                    fmt::print(fg(fmt::color::dark_green), "JP {0:#x}\n", addr);   
+                }
+                break;
+        //JP cc, nn opcodes
+        case 0xC2:
+                {
+                    uint16_t addr {};
+                    if(!flag_zero)
+                    {
+                        reg_pc.reg++;
+                        uint16_t lo = bus->read(reg_pc.reg);
+                        reg_pc.reg++;
+                        uint16_t hi = bus->read(reg_pc.reg);
+
+                        uint16_t addr = (hi << 8) | lo;
+
+                        jump(addr);
+
+                        fmt::print(fg(fmt::color::dark_green), "JP NZ, {0:#x}; true\n", addr);   
+                    }
+                    else 
+                    {
+                        reg_pc.reg++;
+                        fmt::print(fg(fmt::color::dark_green), "JP NZ, {0:#x}; false\n", addr);   
+                    }
+                }
+                break;
+        case 0xCA:
+                {
+                    uint16_t addr {};
+                    if(flag_zero)
+                    {
+                        reg_pc.reg++;
+                        uint16_t lo = bus->read(reg_pc.reg);
+                        reg_pc.reg++;
+                        uint16_t hi = bus->read(reg_pc.reg);
+
+                        addr = (hi << 8) | lo;
+
+                        jump(addr);
+
+                        fmt::print(fg(fmt::color::dark_green), "JP Z, {0:#x}; true\n", addr);   
+                    }
+                    else 
+                    {
+                        reg_pc.reg++;
+                        fmt::print(fg(fmt::color::dark_green), "JP Z, {0:#x}; false\n", addr);   
+                    }
+                }
+                break;
+        case 0xD2:
+                {
+                    uint16_t addr {};
+                    if(!flag_carry)
+                    {
+                        reg_pc.reg++;
+                        uint16_t lo = bus->read(reg_pc.reg);
+                        reg_pc.reg++;
+                        uint16_t hi = bus->read(reg_pc.reg);
+
+                        uint16_t addr = (hi << 8) | lo;
+
+                        jump(addr);
+
+                        fmt::print(fg(fmt::color::dark_green), "JP NC, {0:#x}; true\n", addr);   
+                    }
+                    else 
+                    {
+                        reg_pc.reg++;
+                        fmt::print(fg(fmt::color::dark_green), "JP NC, {0:#x}; false\n", addr);   
+                    }
+                }
+                break;
+        case 0xDA:
+                {
+                    uint16_t addr {};
+                    if(flag_carry)
+                    {
+                        reg_pc.reg++;
+                        uint16_t lo = bus->read(reg_pc.reg);
+                        reg_pc.reg++;
+                        uint16_t hi = bus->read(reg_pc.reg);
+
+                        uint16_t addr = (hi << 8) | lo;
+
+                        jump(addr);
+
+                        fmt::print(fg(fmt::color::dark_green), "JP C, {0:#x}; true\n", addr);   
+                    }
+                    else 
+                    {
+                        reg_pc.reg++;
+                        fmt::print(fg(fmt::color::dark_green), "JP C, {0:#x}; false\n", addr);   
+                    }
+                }
+                break;
+        case 0xE9:
+                {
+                    //takes only 4 cycles!
+                    jump(reg_hl.reg);
+
+                    cycles -= 8;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "JP (HL)\n");   
+                }
+                break;
         
 
 
@@ -2410,6 +2531,16 @@ void CPU::daa()
     cycles += 4;
     reg_pc.reg++;
 }
+
+//JP nn; JP cc, nn
+void CPU::jump(uint16_t address)
+{
+    reg_pc.reg = address;
+
+    cycles += 12;
+    reg_pc.reg++;
+}
+
 /*instructions*/
 
 /*interrupt*/
