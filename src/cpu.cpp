@@ -1848,8 +1848,99 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
+        //CPL (complement A register)
+        case 0x2F:
+                {
+                    reg_af.hi = ~reg_af.hi;
 
-        
+                    flag_n = true;
+                    flag_half_carry = true;
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "CPL\n");      
+                }
+                break;
+        //CCF (complement carry flag)
+        case 0x3F:  
+                {
+                    flag_n = false;
+                    flag_half_carry = false;
+                    flag_carry = !flag_carry;
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "CCF\n");      
+                }   
+                break;
+        //SCF (set carry flag)
+        case 0x37: 
+                {
+                    flag_n = false;
+                    flag_half_carry = false;
+                    flag_carry = true;
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "SCF\n");      
+                }   
+                break;
+        //NOP
+        case 0x00:
+                {
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "NOP\n");      
+                }
+                break;
+        //HALT
+        case 0x76:
+                {
+                    cycles += 4;
+                    reg_pc.reg++;
+                    //TODO
+                    //check for interrupts
+
+                    fmt::print(fg(fmt::color::dark_green), "HALT\n");      
+                }
+                break;
+        //STOP
+        case 0x10:
+                {
+                    //TODO
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "STOP\n");      
+                }
+                break;
+        //DI (disable interrupts after DI is executed)
+        case 0xF3:
+                {
+                    //TODO
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "DI\n");       
+                }
+                break;
+        //EI (enable interrupts after EI is executed)
+        case 0xFB:
+                {
+                    //TODO
+
+                    cycles += 4;
+                    reg_pc.reg++;
+
+                    fmt::print(fg(fmt::color::dark_green), "EI\n");
+                }
+                break;
         
 
 
