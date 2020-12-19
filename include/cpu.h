@@ -109,6 +109,12 @@ class CPU
 
         //call
         void call(uint8_t lo, uint8_t hi);//call addr
+
+        //restart
+        void rst(uint8_t n);// RST n
+
+        //return
+        void ret();
         
         /*instructions*/
 };

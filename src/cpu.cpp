@@ -2327,7 +2327,94 @@ void CPU::execute(uint8_t opcode)
                 }
                 break;
 
-        
+        //Restart opcodes
+        case 0xC7:
+        case 0xCF:
+        case 0xD7:
+        case 0xDF:
+        case 0xE7:
+        case 0xEF:
+        case 0xF7:
+        case 0xFF:
+                {
+                    immediate();
+                    uint8_t n  = bus->read(reg_pc.reg);
+                    rst(n);
+
+                    fmt::print(fg(fmt::color::dark_green), "RST {0:#x}\n", n);   
+                }
+                break;
+
+        //Return opcodes
+        case 0xC9:
+                {
+                    ret();
+
+                    fmt::print(fg(fmt::color::dark_green), "RET\n");   
+                }
+                break;
+        //RET cc
+        case 0xC0:
+                {
+                    fmt::print(fg(fmt::color::dark_green), "RET NZ; ");   
+                    if(!flag_zero)
+                    {
+                        ret();
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
+        case 0xC8:
+                {
+                    fmt::print(fg(fmt::color::dark_green), "RET Z; ");   
+                    if(flag_zero)
+                    {
+                        ret();
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
+        case 0xD0:
+                {
+                    fmt::print(fg(fmt::color::dark_green), "RET NC; ");   
+                    if(!flag_carry)
+                    {
+                        ret();
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
+        case 0xD8:
+                {
+                    fmt::print(fg(fmt::color::dark_green), "RET C; ");   
+                    if(flag_carry)
+                    {
+                        ret();
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+                }
+                break;
+       
 
 
         default:
@@ -2734,6 +2821,33 @@ void CPU::call(uint8_t lo, uint8_t hi)
 
     cycles += 12;
     reg_pc.reg++;
+}
+
+//RST n
+void CPU::rst(uint8_t n)
+{
+    //takes 32 cycles!!
+    uint16_t addr  = 0;
+    addr = addr | n;
+
+    push(reg_pc.hi);
+    push(reg_pc.lo);
+
+    jump(addr);
+    cycles += 20;
+}
+
+//RET
+void CPU::ret()
+{
+    uint16_t lo = pop();
+    uint16_t hi = pop();
+
+    uint16_t addr = (hi << 8) | lo;
+
+    reg_pc.reg = addr;
+
+    cycles += 8;
 }
 
 /*instructions*/
