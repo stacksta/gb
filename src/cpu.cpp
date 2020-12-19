@@ -2414,6 +2414,18 @@ void CPU::execute(uint8_t opcode)
                     }
                 }
                 break;
+
+        //RETI
+        case 0xD9:
+                {
+                    uint16_t lo = pop();
+                    uint16_t hi = pop();
+
+                    reg_pc.reg = (hi << 8) | lo;
+
+                    cycles += 8;
+                }
+                break;
        
 
 
@@ -2801,7 +2813,7 @@ void CPU::jump(uint16_t address)
     reg_pc.reg = address;
 
     cycles += 12;
-    reg_pc.reg++;
+    //reg_pc.reg++;
 }
 
 //JR n
@@ -2810,7 +2822,7 @@ void CPU::jump_r(uint8_t n)
     reg_pc.reg = reg_pc.reg + n;
 
     cycles += 8;
-    reg_pc.reg++;
+    //reg_pc.reg++;
 }
 
 //CALL nn
@@ -2819,8 +2831,10 @@ void CPU::call(uint8_t lo, uint8_t hi)
     push(hi);
     push(lo);
 
+    reg_pc.reg = (hi << 8) | lo;
+    
     cycles += 12;
-    reg_pc.reg++;
+    //reg_pc.reg++;
 }
 
 //RST n
