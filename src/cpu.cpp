@@ -2230,6 +2230,103 @@ void CPU::execute(uint8_t opcode)
                     }
                 }
                 break;
+
+        //CALL opcodes
+        //call nn
+        case 0xCD:
+                {
+                    immediate();
+                    uint8_t lo = bus->read(reg_pc.reg);
+                    immediate();
+                    uint8_t hi = bus->read(reg_pc.reg);
+
+                    call(lo, hi);
+
+                    fmt::print(fg(fmt::color::dark_green), "CALL {0:#x}{0:#x}\n", hi, lo);
+                }
+                break;
+        //call cc, nn
+        case 0xC4:
+                {
+                    immediate();
+                    uint8_t lo = bus->read(reg_pc.reg);
+                    immediate();
+                    uint8_t hi = bus->read(reg_pc.reg);
+                    fmt::print(fg(fmt::color::dark_green), "CALL NZ, {0:#x}{0:#x};", hi, lo);
+                    if(!flag_zero)
+                    {
+                        call(lo, hi);
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+
+                }
+                break;
+        case 0xCC:
+                {
+                    immediate();
+                    uint8_t lo = bus->read(reg_pc.reg);
+                    immediate();
+                    uint8_t hi = bus->read(reg_pc.reg);
+                    fmt::print(fg(fmt::color::dark_green), "CALL Z, {0:#x}{0:#x};", hi, lo);
+                    if(flag_zero)
+                    {
+                        call(lo, hi);
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+
+                }
+                break;
+        case 0xD4:
+                {
+                    immediate();
+                    uint8_t lo = bus->read(reg_pc.reg);
+                    immediate();
+                    uint8_t hi = bus->read(reg_pc.reg);
+                    fmt::print(fg(fmt::color::dark_green), "CALL NC, {0:#x}{0:#x};", hi, lo);
+                    if(!flag_carry)
+                    {
+                        call(lo, hi);
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+
+                }
+                break;
+        case 0xDC:
+                {
+                    immediate();
+                    uint8_t lo = bus->read(reg_pc.reg);
+                    immediate();
+                    uint8_t hi = bus->read(reg_pc.reg);
+                    fmt::print(fg(fmt::color::dark_green), "CALL C, {0:#x}{0:#x};", hi, lo);
+                    if(flag_carry)
+                    {
+                        call(lo, hi);
+                        fmt::print(fg(fmt::color::dark_green), "true\n");   
+                    }
+                    else 
+                    {
+                        fmt::print(fg(fmt::color::dark_green), "false\n");   
+                        reg_pc.reg++;
+                    }
+
+                }
+                break;
+
         
 
 
@@ -2626,6 +2723,16 @@ void CPU::jump_r(uint8_t n)
     reg_pc.reg = reg_pc.reg + n;
 
     cycles += 8;
+    reg_pc.reg++;
+}
+
+//CALL nn
+void CPU::call(uint8_t lo, uint8_t hi)
+{
+    push(hi);
+    push(lo);
+
+    cycles += 12;
     reg_pc.reg++;
 }
 

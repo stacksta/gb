@@ -18,10 +18,11 @@ int main(int argc, char *argv[])
     cpu.setSP(0xFFFE);
     
     do {
+        fmt::print("PC: {0:#x}", cpu.getPC());
         //fetch
         opcode = bus.read(cpu.getPC());
 
-        fmt::print("{0:#x}: ", opcode);
+        fmt::print(" opcode: {0:#x}: ", opcode);
 
         cpu.execute(opcode);
 
