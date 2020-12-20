@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     cpu.setSP(0xFFFE);
     
     do {
+        cpu.interrupt_handler();
+
         fmt::print("PC: {0:#x}", cpu.getPC());
         //fetch
         opcode = bus.read(cpu.getPC());

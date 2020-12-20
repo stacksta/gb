@@ -1934,7 +1934,8 @@ void CPU::execute(uint8_t opcode)
         //EI (enable interrupts after EI is executed)
         case 0xFB:
                 {
-                    flag_IME = true;
+                    //The effect of EI is delayed by one instruction
+                    interrupt_delay = true;
 
                     cycles += 4;
                     reg_pc.reg++;
@@ -2869,6 +2870,110 @@ void CPU::ret()
 /*interrupt*/
 void CPU::interrupt_handler()
 {
+    if(interrupt_delay)
+    {
+        flag_IME = true;
+        interrupt_delay = false;
+        return;
+    }
+    
+    else if(flag_IME)
+    {
+        /*
+               4 3 2 1 0
+            000x x x x x
+            Bit 0: V-Blank  Interrupt Enable  (INT 40h)  (1=Enable)
+            Bit 1: LCD STAT Interrupt Enable  (INT 48h)  (1=Enable)
+            Bit 2: Timer    Interrupt Enable  (INT 50h)  (1=Enable)
+            Bit 3: Serial   Interrupt Enable  (INT 58h)  (1=Enable)
+            Bit 4: Joypad   Interrupt Enable  (INT 60h)  (1=Enable)
+        */
+       // Bit 0: V-Blank $40
+       if((bus->read(flag_IE) & 0x01) && (bus->read(flag_IF) & 0x01) == 1)
+       {
+           push(reg_pc.hi);
+           push(reg_pc.lo);
 
+           reg_pc.hi = 0x00;
+           reg_pc.lo = 0x40;
+
+           //set bit 0 to 0
+           uint8_t value = bus->read(flag_IF) & ~0x01;
+           bus->write(flag_IF, value);
+
+           flag_IME = false;
+           cycles += 5;
+           return;
+       }
+       // Bit 1: LCD STAT $48
+       else if((bus->read(flag_IE) & 0x02) && (bus->read(flag_IF) & 0x02) == 1)
+       {
+           push(reg_pc.hi);
+           push(reg_pc.lo);
+
+           reg_pc.hi = 0x00;
+           reg_pc.lo = 0x48;
+
+           //set bit 1 to 0
+           uint8_t value = bus->read(flag_IF) & ~0x02;
+           bus->write(flag_IF, value);
+
+           flag_IME = false;
+           cycles += 5;
+           return;
+       }
+       // Bit 2: Timer $50
+       else if((bus->read(flag_IE) & 0x04) && (bus->read(flag_IF) & 0x04) == 1)
+       {
+           push(reg_pc.hi);
+           push(reg_pc.lo);
+
+           reg_pc.hi = 0x00;
+           reg_pc.lo = 0x50;
+
+           //set bit 2 to 0
+           uint8_t value = bus->read(flag_IF) & ~0x04;
+           bus->write(flag_IF, value);
+
+           flag_IME = false;
+           cycles += 5;
+           return;
+       }
+       // Bit 3: Serial $58
+       else if((bus->read(flag_IE) && 0x08) && (bus->read(flag_IF) && 0x08) == 1)
+       {
+           push(reg_pc.hi);
+           push(reg_pc.lo);
+
+           reg_pc.hi = 0x00;
+           reg_pc.lo = 0x58;
+
+           //set bit 3 to 0
+           uint8_t value = bus->read(flag_IF) & ~0x08;
+           bus->write(flag_IF, value);
+
+           flag_IME = false;
+           cycles += 5;
+           return;
+       }
+       // Bit 4: Joypad $60
+       else if((bus->read(flag_IE) && 0x10) && (bus->read(flag_IF) && 0x10) == 1)
+       {
+           push(reg_pc.hi);
+           push(reg_pc.lo);
+
+           reg_pc.hi = 0x00;
+           reg_pc.lo = 0x60;
+
+           //set bit 4 to 0
+           uint8_t value = bus->read(flag_IF) & ~0x10;
+           bus->write(flag_IF, value);
+
+           flag_IME = false;
+           cycles += 5;
+           return;
+       }
+
+    }
 }
 /*interrupt*/

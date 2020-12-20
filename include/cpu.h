@@ -32,6 +32,7 @@ class CPU
         uint16_t getSP();
         void setSP(uint16_t address);
 
+        void interrupt_handler();
     private:
         /*registers*/
         Register reg_af {};
@@ -57,13 +58,14 @@ class CPU
         /*stack functions*/
 
         /*interrupt*/
-        const uint16_t IF_FLAG = 0xFFFF;
-        const uint16_t IE_FLAG = 0xFF0F;
+        const uint16_t flag_IF = 0xFFFF;
+        const uint16_t flag_IE = 0xFF0F;
 
         bool halt {};
         bool flag_IME {};//interrupt flag
 
-        void interrupt_handler();
+        bool interrupt_delay {};
+
         /*interrupt*/
 
       
